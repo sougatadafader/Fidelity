@@ -3,6 +3,7 @@ package com.example.trader.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
@@ -34,6 +35,19 @@ public class TradeService {
 		return trades;	
 	}
 	
+	@GetMapping("/api/summary/security/{security}")
+	public List<Trade> findBySecurity(@PathVariable("security") String security){
+		List<Trade> result = trades.stream()
+				.filter(trade -> (trade.getSecurity()).equals(security.toUpperCase()))
+				.collect(Collectors.toList());
+		if(trades.isEmpty())
+		{
+			return new ArrayList<Trade>();
+		}
+		
+		return result;	
+	}
+	
 	@PostMapping("/api/trade")
 	public Trade createTrade(@RequestBody Trade trade)
 	{
@@ -41,6 +55,8 @@ public class TradeService {
 		trades.add(trade);
 		return trade;
 	}
+	
+	
 	
 	
 
