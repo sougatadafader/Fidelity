@@ -69,14 +69,41 @@ public class TradeService {
 		if (totalTrades > 0) {
 			List<Trade> result = trades.stream().filter(trade -> (trade.getSecurity()).equals(security.toUpperCase()))
 					.collect(Collectors.toList());
-
-			long tradesSize =result.size();
-			if ( tradesSize> 0) {
+			long tradesSize = result.size();
+			if (tradesSize > 0) {
 				Iterator<Trade> tradeItr = result.iterator();
 				long quantity = 0;
 				long value = 0;
-				
+				while (tradeItr.hasNext()) {
+					Trade t = tradeItr.next();
+					quantity += t.getQuantity();
+					value += t.getPrice();
+				}
 
+				try {
+					jsonString = new JSONObject().put("total quantity", quantity)
+							.put("total number of orders", tradesSize).put("average Price", (value / tradesSize))
+							.toString();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+		return jsonString;
+	}
+	
+	@GetMapping("/api/summary/fund/{fundName}")
+	public String findSummaryByFund(@PathVariable("fundName") String fund) {
+		String jsonString = "";
+		if (totalTrades > 0) {
+			List<Trade> result = trades.stream().filter(trade -> (trade.getFundName()).equals(fund.toUpperCase()))
+					.collect(Collectors.toList());
+			long tradesSize = result.size();
+			if (tradesSize > 0) {
+				Iterator<Trade> tradeItr = result.iterator();
+				long quantity = 0;
+				long value = 0;
 				while (tradeItr.hasNext()) {
 					Trade t = tradeItr.next();
 					quantity += t.getQuantity();
