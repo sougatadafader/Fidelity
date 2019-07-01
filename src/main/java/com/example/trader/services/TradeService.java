@@ -81,7 +81,7 @@ public class TradeService {
 
 	}
 
-	@GetMapping("/api/run")
+	@GetMapping("/")
 	public String invokeScheduler() {
 		if (!isRunning) {
 			runScheduler();
