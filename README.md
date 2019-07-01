@@ -23,12 +23,12 @@ order summary analysis on them.**
 ## Definition of an Order
 
 An order contains the following fields which has to be sent during a ```POST``` call.
-   * order id
-   * side (buy or sell)
-   * security
-   * fund name
-   * quantity
-   * price
+   * order id (optional)
+   * side (buy or sell) (required)
+   * security (required)
+   * fund name (required)
+   * quantity (required)
+   * price (required)
 
 ## HEROKU URL
  **https://fid-trade.herokuapp.com/**
