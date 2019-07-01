@@ -2,8 +2,10 @@ package com.example.trader.services;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.json.JSONException;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.trader.models.Trade;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Predicate;
 
 @RestController
 @CrossOrigin(origins = "*", allowCredentials = "true", allowedHeaders = "*")
@@ -28,10 +31,13 @@ public class TradeService {
 	long totalValue = 0;
 	long totalQuantity = 0;
 	long avgPrice = 0;
+	Map<String, Integer> map = new HashMap<String, Integer>();
+
+	int listSize = trades.size();
 
 	public void runScheduler() {
 		int MINUTES = 1;
-		int SECONDS = 60;
+		int SECONDS = 10;
 		int MILLISECONDS = 1000;
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
@@ -39,12 +45,43 @@ public class TradeService {
 			 * DEFINITION: schedule(TimerTask task,long delay,long period) Overriding the
 			 * run function of the timer to do custom work
 			 */
+			int start = 0;
+
 			@Override
 			public void run() {
-				String time = DateFormat.getDateTimeInstance().format(System.currentTimeMillis());
-				System.out.println("Last Updated " + time);
+
+				if (start == 0 ||  trades.size()>start) {
+					Iterator<Trade> tradeItr = trades.listIterator(start);
+					System.out.println("--------------" + start + "-------------------");
+
+					while (tradeItr.hasNext()) {
+						Trade tr = tradeItr.next();
+						String hashValue = tr.getSide() + tr.getSecurity() + tr.getFundName();
+						Integer count = map.get(hashValue);
+						map.put(hashValue, (count == null) ? 1 : count + 1);
+					}
+
+					for (Map.Entry<String, Integer> entry : map.entrySet()) {
+						System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+					}
+
+					String time = DateFormat.getDateTimeInstance().format(System.currentTimeMillis());
+					System.out.println("Last Updated " + time);
+					start = trades.size();
+				}
 			}
+
 		}, 0, MILLISECONDS * SECONDS * MINUTES);
+
+	}
+
+	@GetMapping("/api/run")
+	public String invokeScheduler() {
+		if (!isRunning) {
+			runScheduler();
+			isRunning = true;
+		}
+		return "Scheduler Started";
 	}
 
 	@GetMapping("/api/summary")
@@ -52,10 +89,8 @@ public class TradeService {
 		String jsonString = "";
 		if (totalTrades > 0) {
 			try {
-				jsonString = new JSONObject()
-						.put("total quantity", totalQuantity)
-						.put("total number of orders", totalTrades)
-						.put("average Price", (totalValue / totalTrades))
+				jsonString = new JSONObject().put("total quantity", totalQuantity)
+						.put("total number of orders", totalTrades).put("average Price", (totalValue / totalTrades))
 						.toString();
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -68,43 +103,11 @@ public class TradeService {
 	@GetMapping("/api/summary/security/{securityName}")
 	public String findSummaryBySecurity(@PathVariable("securityName") String security) {
 		String jsonString = "";
-		if (totalTrades > 0) {
-			List<Trade> result = trades.stream()
-					.filter(trade -> (trade.getSecurity()).equals(security.toUpperCase()))
-					.collect(Collectors.toList());
-			long tradesSize = result.size();
-			if (tradesSize > 0) {
-				Iterator<Trade> tradeItr = result.iterator();
-				long quantity = 0;
-				long value = 0;
-				while (tradeItr.hasNext()) {
-					Trade t = tradeItr.next();
-					quantity += t.getQuantity();
-					value += t.getPrice();
-				}
 
-				try {
-					jsonString = new JSONObject()
-							.put("total quantity", quantity)
-							.put("total number of orders", tradesSize)
-							.put("average Price", (value / tradesSize))
-							.toString();
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
+		Predicate<Trade> hasSameSecurity = trade -> (trade.getSecurity()).equals(security.toUpperCase());
 
-		}
-		return jsonString;
-	}
-	
-	@GetMapping("/api/summary/fund/{fundName}")
-	public String findSummaryByFund(@PathVariable("fundName") String fund) {
-		String jsonString = "";
 		if (totalTrades > 0) {
-			List<Trade> result = trades.stream()
-					.filter(trade -> (trade.getFundName()).equals(fund.toUpperCase()))
-					.collect(Collectors.toList());
+			List<Trade> result = trades.stream().filter(hasSameSecurity).collect(Collectors.toList());
 			long tradesSize = result.size();
 			if (tradesSize > 0) {
 				Iterator<Trade> tradeItr = result.iterator();
@@ -118,8 +121,37 @@ public class TradeService {
 
 				try {
 					jsonString = new JSONObject().put("total quantity", quantity)
-							.put("total number of orders", tradesSize)
-							.put("average Price", (value / tradesSize))
+							.put("total number of orders", tradesSize).put("average Price", (value / tradesSize))
+							.toString();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+		return jsonString;
+	}
+
+	@GetMapping("/api/summary/fund/{fundName}")
+	public String findSummaryByFund(@PathVariable("fundName") String fund) {
+		String jsonString = "";
+		Predicate<Trade> hasSameFundName = trade -> (trade.getFundName()).equals(fund.toUpperCase());
+		if (totalTrades > 0) {
+			List<Trade> result = trades.stream().filter(hasSameFundName).collect(Collectors.toList());
+			long tradesSize = result.size();
+			if (tradesSize > 0) {
+				Iterator<Trade> tradeItr = result.iterator();
+				long quantity = 0;
+				long value = 0;
+				while (tradeItr.hasNext()) {
+					Trade t = tradeItr.next();
+					quantity += t.getQuantity();
+					value += t.getPrice();
+				}
+
+				try {
+					jsonString = new JSONObject().put("total quantity", quantity)
+							.put("total number of orders", tradesSize).put("average Price", (value / tradesSize))
 							.toString();
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -132,8 +164,6 @@ public class TradeService {
 
 	@GetMapping("/api/trades")
 	public List<Trade> findAllTrades() {
-		
-
 		if (trades.isEmpty()) {
 			return new ArrayList<Trade>();
 		}
@@ -159,17 +189,11 @@ public class TradeService {
 		if (trades.isEmpty()) {
 			return new ArrayList<Trade>();
 		}
-
 		return result;
 	}
 
 	@PostMapping("/api/trade")
 	public Trade createTrade(@RequestBody Trade trade) {
-		System.out.println(isRunning);
-		if (!isRunning) {
-			runScheduler();
-			isRunning = true;
-		}
 		trade.setId(System.currentTimeMillis());
 		trade.setFundName(trade.getFundName().toUpperCase());
 		trade.setSecurity(trade.getSecurity().toUpperCase());
