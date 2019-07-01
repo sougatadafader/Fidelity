@@ -28,10 +28,11 @@ public class TradeService {
 	List<Trade> trades = new ArrayList<Trade>();
 	boolean isRunning = false;
 	long totalTrades = 0;
-	long totalValue = 0;
+	double totalValue = 0;
 	long totalQuantity = 0;
-	long avgPrice = 0;
+	double avgPrice = 0;
 	Map<String, Integer> map = new HashMap<String, Integer>();
+	Map<String, Integer> combinableMap = new HashMap<String, Integer>();
 
 	int listSize = trades.size();
 
@@ -50,23 +51,28 @@ public class TradeService {
 			@Override
 			public void run() {
 
-				if (start == 0 ||  trades.size()>start) {
+				if (trades.size()>start) {
 					Iterator<Trade> tradeItr = trades.listIterator(start);
-					System.out.println("--------------" + start + "-------------------");
+					System.out.println("--------- START POSITION:" + start + "-------------------\n\n");
 
 					while (tradeItr.hasNext()) {
 						Trade tr = tradeItr.next();
-						String hashValue = tr.getSide() + tr.getSecurity() + tr.getFundName();
+						String hashValue = tr.getSide() +","+ tr.getSecurity() +","+ tr.getFundName();
 						Integer count = map.get(hashValue);
 						map.put(hashValue, (count == null) ? 1 : count + 1);
+						
+						if(map.get(hashValue)>1)
+						{
+							combinableMap.put(hashValue,map.get(hashValue) );
+						}
 					}
 
 					for (Map.Entry<String, Integer> entry : map.entrySet()) {
-						System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+						System.out.println("key: " + entry.getKey() + " value: " + entry.getValue());
 					}
 
 					String time = DateFormat.getDateTimeInstance().format(System.currentTimeMillis());
-					System.out.println("Last Updated " + time);
+					System.out.println("Last Updated " + time+"\n\n");
 					start = trades.size();
 				}
 			}
@@ -88,9 +94,13 @@ public class TradeService {
 	public String findSummary() {
 		String jsonString = "";
 		if (totalTrades > 0) {
+			
 			try {
-				jsonString = new JSONObject().put("total quantity", totalQuantity)
-						.put("total number of orders", totalTrades).put("average Price", (totalValue / totalTrades))
+				jsonString = new JSONObject()
+						.put("totalQuantity", totalQuantity)
+						.put("totalNumberOfOrders", totalTrades)
+						.put("averageprice", (totalValue / totalTrades))
+						.put("combinableOrders", new JSONObject(combinableMap))
 						.toString();
 			} catch (JSONException e) {
 				e.printStackTrace();
