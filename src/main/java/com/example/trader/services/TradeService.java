@@ -175,6 +175,7 @@ public class TradeService {
 		return jsonString;
 	}
 
+	
 	@GetMapping("/api/trades")
 	public List<Trade> findAllTrades() {
 		if (trades.isEmpty()) {
