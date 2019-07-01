@@ -103,7 +103,8 @@ public class TradeService {
 						.put("combinableOrders", new JSONObject(combinableMap))
 						.toString();
 			} catch (JSONException e) {
-				e.printStackTrace();
+				 e.printStackTrace();
+				 return "Failure";
 			}
 		}
 
@@ -135,6 +136,7 @@ public class TradeService {
 							.toString();
 				} catch (JSONException e) {
 					e.printStackTrace();
+					 return "Failure";
 				}
 			}
 
@@ -165,6 +167,7 @@ public class TradeService {
 							.toString();
 				} catch (JSONException e) {
 					e.printStackTrace();
+					 return "Failure";
 				}
 			}
 
