@@ -52,8 +52,10 @@ public class TradeService {
 		String jsonString = "";
 		if (totalTrades > 0) {
 			try {
-				jsonString = new JSONObject().put("total quantity", totalQuantity)
-						.put("total number of orders", totalTrades).put("average Price", (totalValue / totalTrades))
+				jsonString = new JSONObject()
+						.put("total quantity", totalQuantity)
+						.put("total number of orders", totalTrades)
+						.put("average Price", (totalValue / totalTrades))
 						.toString();
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -67,7 +69,8 @@ public class TradeService {
 	public String findSummaryBySecurity(@PathVariable("securityName") String security) {
 		String jsonString = "";
 		if (totalTrades > 0) {
-			List<Trade> result = trades.stream().filter(trade -> (trade.getSecurity()).equals(security.toUpperCase()))
+			List<Trade> result = trades.stream()
+					.filter(trade -> (trade.getSecurity()).equals(security.toUpperCase()))
 					.collect(Collectors.toList());
 			long tradesSize = result.size();
 			if (tradesSize > 0) {
@@ -81,8 +84,10 @@ public class TradeService {
 				}
 
 				try {
-					jsonString = new JSONObject().put("total quantity", quantity)
-							.put("total number of orders", tradesSize).put("average Price", (value / tradesSize))
+					jsonString = new JSONObject()
+							.put("total quantity", quantity)
+							.put("total number of orders", tradesSize)
+							.put("average Price", (value / tradesSize))
 							.toString();
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -97,7 +102,8 @@ public class TradeService {
 	public String findSummaryByFund(@PathVariable("fundName") String fund) {
 		String jsonString = "";
 		if (totalTrades > 0) {
-			List<Trade> result = trades.stream().filter(trade -> (trade.getFundName()).equals(fund.toUpperCase()))
+			List<Trade> result = trades.stream()
+					.filter(trade -> (trade.getFundName()).equals(fund.toUpperCase()))
 					.collect(Collectors.toList());
 			long tradesSize = result.size();
 			if (tradesSize > 0) {
@@ -112,7 +118,8 @@ public class TradeService {
 
 				try {
 					jsonString = new JSONObject().put("total quantity", quantity)
-							.put("total number of orders", tradesSize).put("average Price", (value / tradesSize))
+							.put("total number of orders", tradesSize)
+							.put("average Price", (value / tradesSize))
 							.toString();
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -125,11 +132,7 @@ public class TradeService {
 
 	@GetMapping("/api/trades")
 	public List<Trade> findAllTrades() {
-		System.out.println(isRunning);
-		if (!isRunning) {
-			runScheduler();
-			isRunning = true;
-		}
+		
 
 		if (trades.isEmpty()) {
 			return new ArrayList<Trade>();
@@ -162,7 +165,15 @@ public class TradeService {
 
 	@PostMapping("/api/trade")
 	public Trade createTrade(@RequestBody Trade trade) {
+		System.out.println(isRunning);
+		if (!isRunning) {
+			runScheduler();
+			isRunning = true;
+		}
 		trade.setId(System.currentTimeMillis());
+		trade.setFundName(trade.getFundName().toUpperCase());
+		trade.setSecurity(trade.getSecurity().toUpperCase());
+		trade.setSide(trade.getSide().toUpperCase());
 		trades.add(trade);
 		totalTrades += 1;
 		totalValue += trade.getPrice();
