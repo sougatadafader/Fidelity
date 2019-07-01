@@ -6,7 +6,7 @@ Java Assignment for Fidelity High Income group
 **a Java REST service that will consume a collection of trade orders, and perform some asynchronous
 order summary analysis on them.**
 
-- [x] API to add trades (POST)
+- [x] API to add trades (POST) 
 - [x] API to fetch summary of all trades (GET)
 - [x] API to fetch summary based on specific security (GET)
 - [x] API to fetch summary based on specific fund (GET)
@@ -23,29 +23,66 @@ order summary analysis on them.**
 ## Definition of an Order
 
 An order contains the following fields which has to be sent during a ```POST``` call.
-   * order id
-   * side (buy or sell)
-   * security
-   * fund name
-   * quantity
-   * price
+   * order id (optional)
+   * side (buy or sell) (required)
+   * security (required)
+   * fund name (required)
+   * quantity (required)
+   * price (required)
 
+## HEROKU URL
+ **https://fid-trade.herokuapp.com/**
 
 ## API Documentation
 The REST service should provide a number of endpoints, as follows:
-* 
 
+**POST** ```api/trade``` 
+ <br /> 
+@required body (example) : 
+``` { "side":"BUY", "security":"AAPL", "fundName":"MAG", "quantity":2000, "price":100}```
 
-the ability to consume a collection of trade orders which will be stored in-memory (not in a database)
-* order summary: total number of orders, with the total quantity and average price. It should also return
-the total number of combinable orders (see definition below)
-* order summary by security: as above except will provide this summary for a specified security
-* order summary by fund: as above except will provide this summary for a specified fund
+>consume a trade order which will be stored in memory (not in a database)
+ - - - -
+ 
+**GET** ```api/summary``` 
+>returns total number of orders, with the total quantity and average price. It should also return
+the total number of combinable orders
+ - - - -
 
+**GET** ```api/summary/security/{securityName}```
+<br /> 
+@required path variable (example) :
+``` AAPL```
+>returns total number of orders, with the total quantity and average price of that specific security
+ - - - -
 
+**GET** ```api/summary/fund/{fundName}```
+<br /> 
+@required path variable (example) :
+``` MAG```
+>returns total number of orders, with the total quantity and average price of that specific fund
+ - - - -
 
+### Extra API endpoints
 
+ 
+**GET** ```api/trades``` 
+>returns list of all the trades
+ - - - -
 
+**GET** ```api/trades/security/{securityName}```
+<br /> 
+@required path variable (example) :
+``` AAPL```
+>returns list of all the trades for that specific security
+ - - - -
+
+**GET** ```api/trades/fund/{fundName}```
+<br /> 
+@required path variable (example) :
+``` MAG```
+>returns list of all the trades for that specific fund
+ - - - -
 
 
 
@@ -71,8 +108,6 @@ the total number of combinable orders (see definition below)
 
 
  If you successfully followed the instructions, you're now ready for taking off! :rocket:	
-
-![](https://media.giphy.com/media/k0CJuMw9h7m3S/giphy.gif)
 
 
 
