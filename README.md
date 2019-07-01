@@ -63,6 +63,28 @@ the total number of combinable orders
 >returns total number of orders, with the total quantity and average price of that specific fund
  - - - -
 
+### Extra API endpoints
+
+ 
+**GET** ```api/trades``` 
+>returns list of all the trades
+ - - - -
+
+**GET** ```api/trades/security/{securityName}```
+<br /> 
+@required path variable (example) :
+``` AAPL```
+>returns list of all the trades for that specific security
+ - - - -
+
+**GET** ```api/trades/fund/{fundName}```
+<br /> 
+@required path variable (example) :
+``` MAG```
+>returns list of all the trades for that specific fund
+ - - - -
+
+
 
 ## SETUP Documentation
 ### Trade Server Setup
