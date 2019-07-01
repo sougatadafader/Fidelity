@@ -3,7 +3,7 @@ Java Assignment for Fidelity High Income group
 
 ##Getting started
 
-### Server 
+### Trade Server Setup
 ---
 
 *  Install STS or Eclipse for running the server
@@ -15,7 +15,7 @@ Java Assignment for Fidelity High Income group
 *  Open the Fidelity inside the STS or Eclipse application
 
 *  Find the port inside the application.properties file. Change the port based on your suitability.
-    example: ```server.port = 9000```
+   \n example: ```server.port = 9000```
 
 *  Update the client services to point the updated port.
 
