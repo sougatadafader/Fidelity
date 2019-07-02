@@ -36,21 +36,22 @@ public class TradeService {
 
 	int listSize = trades.size();
 
+	/**
+	 * Creates two HashMaps. 
+	 * First HashMap to store all the trades and their frequency in key,value format.
+	 * Second HashMap to store trades with more than one occurrence
+	 */
+	
 	public void runScheduler() {
+		
 		int MINUTES = 1;
-		int SECONDS = 10;
+		int SECONDS = 60;
 		int MILLISECONDS = 1000;
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
-			/*
-			 * DEFINITION: schedule(TimerTask task,long delay,long period) Overriding the
-			 * run function of the timer to do custom work
-			 */
 			int start = 0;
-
 			@Override
 			public void run() {
-
 				if (trades.size()>start) {
 					Iterator<Trade> tradeItr = trades.listIterator(start);
 					System.out.println("--------- START POSITION:" + start + "-------------------\n\n");
@@ -61,10 +62,7 @@ public class TradeService {
 						Integer count = map.get(hashValue);
 						map.put(hashValue, (count == null) ? 1 : count + 1);
 						
-						if(map.get(hashValue)>1)
-						{
-							combinableMap.put(hashValue,map.get(hashValue) );
-						}
+						if(map.get(hashValue)>1){ combinableMap.put(hashValue,map.get(hashValue) );}
 					}
 
 					for (Map.Entry<String, Integer> entry : map.entrySet()) {
