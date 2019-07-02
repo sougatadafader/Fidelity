@@ -25,44 +25,75 @@ import java.util.function.Predicate;
 @RestController
 @CrossOrigin(origins = "*", allowCredentials = "true", allowedHeaders = "*")
 public class TradeService {
+	
+	/**
+	 * ArrayList to store all the trades in-memory
+	 */
 	List<Trade> trades = new ArrayList<Trade>();
+	
+	/**
+	 * boolean value signifying if the background service is running or not.
+	 */
 	boolean isRunning = false;
+	/**
+	 * Stores the total number of trades
+	 */
 	long totalTrades = 0;
+	
+	/**
+	 *  Stores the total value of all the trades
+	 */
 	double totalValue = 0;
+	
+	/**
+	 * Stores the total quantity of all the trades.
+	 */
 	long totalQuantity = 0;
-	double avgPrice = 0;
+	
+	/**
+	 * HashMap to store all the trades in key,value format.
+	 * key => Side,Security,FundName;
+	 * value => number of Occurrences
+	 */
 	Map<String, Integer> map = new HashMap<String, Integer>();
+	
+	/**
+	 * HashMap to store trades with more than one occurrence whose side, security and fundName are same.
+	 */
 	Map<String, Integer> combinableMap = new HashMap<String, Integer>();
 
 	int listSize = trades.size();
 
 	/**
-	 * Creates two HashMaps. 
-	 * First HashMap to store all the trades and their frequency in key,value format.
-	 * Second HashMap to store trades with more than one occurrence
+	 * Populates both the HashMaps and runs the scheduler only if the arrayList size has increased.
+	 * The algorithm runs in a defined interval of one minute.
+	 *
 	 */
-	
+
 	public void runScheduler() {
-		
+
 		int MINUTES = 1;
 		int SECONDS = 60;
 		int MILLISECONDS = 1000;
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			int start = 0;
+
 			@Override
 			public void run() {
-				if (trades.size()>start) {
+				if (trades.size() > start) {
 					Iterator<Trade> tradeItr = trades.listIterator(start);
 					System.out.println("--------- START POSITION:" + start + "-------------------\n\n");
 
 					while (tradeItr.hasNext()) {
 						Trade tr = tradeItr.next();
-						String hashValue = tr.getSide() +","+ tr.getSecurity() +","+ tr.getFundName();
+						String hashValue = tr.getSide() + "," + tr.getSecurity() + "," + tr.getFundName();
 						Integer count = map.get(hashValue);
 						map.put(hashValue, (count == null) ? 1 : count + 1);
-						
-						if(map.get(hashValue)>1){ combinableMap.put(hashValue,map.get(hashValue) );}
+
+						if (map.get(hashValue) > 1) {
+							combinableMap.put(hashValue, map.get(hashValue));
+						}
 					}
 
 					for (Map.Entry<String, Integer> entry : map.entrySet()) {
@@ -70,7 +101,7 @@ public class TradeService {
 					}
 
 					String time = DateFormat.getDateTimeInstance().format(System.currentTimeMillis());
-					System.out.println("Last Updated " + time+"\n\n");
+					System.out.println("Last Updated " + time + "\n\n");
 					start = trades.size();
 				}
 			}
@@ -92,17 +123,14 @@ public class TradeService {
 	public String findSummary() {
 		String jsonString = "";
 		if (totalTrades > 0) {
-			
+
 			try {
-				jsonString = new JSONObject()
-						.put("totalQuantity", totalQuantity)
-						.put("totalNumberOfOrders", totalTrades)
-						.put("averageprice", (totalValue / totalTrades))
-						.put("combinableOrders", new JSONObject(combinableMap))
-						.toString();
+				jsonString = new JSONObject().put("totalQuantity", totalQuantity)
+						.put("totalNumberOfOrders", totalTrades).put("averageprice", (totalValue / totalTrades))
+						.put("combinableOrders", new JSONObject(combinableMap)).toString();
 			} catch (JSONException e) {
-				 e.printStackTrace();
-				 return "Failure";
+				e.printStackTrace();
+				return "Failure";
 			}
 		}
 
@@ -134,7 +162,7 @@ public class TradeService {
 							.toString();
 				} catch (JSONException e) {
 					e.printStackTrace();
-					 return "Failure";
+					return "Failure";
 				}
 			}
 
@@ -165,7 +193,7 @@ public class TradeService {
 							.toString();
 				} catch (JSONException e) {
 					e.printStackTrace();
-					 return "Failure";
+					return "Failure";
 				}
 			}
 
@@ -173,7 +201,6 @@ public class TradeService {
 		return jsonString;
 	}
 
-	
 	@GetMapping("/api/trades")
 	public List<Trade> findAllTrades() {
 		if (trades.isEmpty()) {
